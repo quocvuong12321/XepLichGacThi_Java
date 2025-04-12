@@ -1,4 +1,3 @@
-
 package DAL;
 
 import DTO.GiangVienDTO;
@@ -36,6 +35,7 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
  * @author ASUS_TKD
  */
 public class XuatFileExcelDAL {
+
     public String xuatFileExcel(List<GiangVienDTO> lstGiangVien, List<String> uniqueColumns, int[][] resultMatrix, List<LichThiDTO> lstLichThi, String filePath) throws FileNotFoundException, IOException {
         Workbook workbook = new XSSFWorkbook();
         Sheet sheet = workbook.createSheet("Lịch Gác Thi");
@@ -89,15 +89,14 @@ public class XuatFileExcelDAL {
 
         XSSFFont boldFont = (XSSFFont) workbook.createFont();
         boldFont.setBold(true);
-        
+
         CellStyle boldStyle = workbook.createCellStyle();
         boldStyle.setFont(boldFont);
         boldStyle.setBorderTop(BorderStyle.THIN);
         boldStyle.setBorderBottom(BorderStyle.THIN);
         boldStyle.setBorderLeft(BorderStyle.THIN);
         boldStyle.setBorderRight(BorderStyle.THIN);
-        
-        
+
         // Tiêu đề ngày/tiết/thứ
         Row dateRow = sheet.createRow(9);
         Row dayRow = sheet.createRow(10);
@@ -162,11 +161,26 @@ public class XuatFileExcelDAL {
         unassignedRow.createCell(0).setCellValue("Số ca gác thi chưa cấp:");
 
         int totalAssigned = 0, totalUnassigned = 0;
-
+        SimpleDateFormat dateFormatDTO = new SimpleDateFormat("dd/MM/yyyy");
         for (int i = 0; i < uniqueColumns.size(); i++) {
-            int requiredCount = lstLichThi.get(i).getSoGVCanCap();
-            int assignedCount = 0;
+            // Lấy thông tin ngày và tiết học
+            String[] parts = uniqueColumns.get(i).split(" ", 2);
+            String date = parts[0];
+            String period = parts.length > 1 ? parts[1].replace("- Tiết ", "") : "";
 
+            // Tìm đối tượng LichThiDTO phù hợp
+            LichThiDTO lichThi = lstLichThi.stream()
+                    .filter(lt -> dateFormatDTO.format(lt.getNgay()).equals(date)
+                    && String.format("%d-%d", lt.getTietBatDau(), lt.getTietKetThuc()).equals(period))
+                    .findFirst()
+                    .orElse(null);
+
+            // Nếu không tìm thấy, đặt giá trị mặc định
+            int requiredCount = lichThi != null ? lichThi.getSoGVCanCap() : 0;
+            // int requiredCount = lstLichThi.get(i).getSoGVCanCap();
+
+            // Tính số ca đã cấp
+            int assignedCount = 0;
             for (int j = 0; j < lstGiangVien.size(); j++) {
                 if (resultMatrix[j][i] == 1) {
                     assignedCount++;
@@ -198,7 +212,7 @@ public class XuatFileExcelDAL {
         dateRow.getCell(0).setCellStyle(borderedStyle);
         dayRow.getCell(0).setCellStyle(borderedStyle);
         periodRow.getCell(0).setCellStyle(borderedStyle);
-        
+
         //In đậm cho cột
         requiredRow.getCell(0).setCellStyle(boldStyle);
         assignedRow.getCell(0).setCellStyle(boldStyle);
@@ -224,7 +238,6 @@ public class XuatFileExcelDAL {
             }
         }
 
-
         // Đặt độ rộng cột
         sheet.setColumnWidth(0, 30 * 256); // Cột A
         for (int i = 1; i < uniqueColumns.size() + 1; i++) {
@@ -232,7 +245,6 @@ public class XuatFileExcelDAL {
         }
 
         dateRow.setHeightInPoints(50); // Đặt chiều cao cho dòng "Ngày"
-
 
         // Ghi file
         try (FileOutputStream fos = new FileOutputStream(filePath)) {
@@ -244,8 +256,5 @@ public class XuatFileExcelDAL {
             return null;
         }
     }
-
-
-
 
 }
