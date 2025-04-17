@@ -60,4 +60,11 @@ public class LichThiDTO {
         this.tietKetThuc = tietKetThuc;
         this.soGVCanCap = soGVCanCap;
     }
+    
+    public LichThiDTO(LichThiDTO lt) {
+        this.ngay = lt.ngay;
+        this.tietBatDau = lt.tietBatDau;
+        this.tietKetThuc = lt.tietKetThuc;
+        this.soGVCanCap = lt.soGVCanCap;
+    }
 }

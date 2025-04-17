@@ -372,10 +372,17 @@ public class Xep_lich_frm extends javax.swing.JFrame {
             JOptionPane.showMessageDialog(this, "Chưa có lịch thi để xếp");
             return;
         }
-
-        lstKqXep = xlBLL.xepLichGacThi(lstLichThi, lstGiangVien);
+        
+        List<LichThiDTO> dsLichThi = new ArrayList<>();
+    for (LichThiDTO item : lstLichThi) {
+    dsLichThi.add(new LichThiDTO(item));
+}   
+        
+        lstKqXep = xlBLL.xepLichGacThi(dsLichThi, lstGiangVien);
         txtDiemXepLich.setText(xlBLL.danhGiaLichThi(lstKqXep) + " Điểm");
-
+        
+        
+        
         ketquaxep = xlBLL.chuyenDoiXepLichSangMang(lstKqXep, lstGiangVien);
 
         SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy"); // Định dạng ngày ngắn gọn
