@@ -31,21 +31,24 @@ public class XepLichBLL {
         return xlDAL.chuyenDoiXepLichSangMang(ketQuaXepLich, lstGiangVien);
     }
 
-    public static int danhGiaLichThi(List<LichThiXepResult> danhSachKetQua) {
-        if (danhSachKetQua == null) {
+    public static int danhGiaLichThi(List<GiangVienDTO> danhSachGiangVien) {
+        if (danhSachGiangVien == null) {
             throw new IllegalArgumentException("Danh sách kết quả không được để null.");
         }
-        return XepLichDAL.danhGiaLichThi(danhSachKetQua);
+        return XepLichDAL.danhGiaLichThi(danhSachGiangVien);
     }
 
     public List<LichThiDTO> layDanhSachLichChuaXep() {
         return xlDAL.layDanhSachLichChuaXep();
     }
 
-    public void caiTienKetQua(List<LichThiXepResult> ketQuaXepLich, List<GiangVienDTO> lstGiangVien) {
-        if (ketQuaXepLich == null || lstGiangVien == null) {
-            throw new IllegalArgumentException("Danh sách kết quả hoặc giảng viên không được để null.");
-        }
-        xlDAL.caiTienKetQua(ketQuaXepLich, lstGiangVien);
+//    public void caiTienKetQua(List<LichThiXepResult> ketQuaXepLich, List<GiangVienDTO> lstGiangVien) {
+//        if (ketQuaXepLich == null || lstGiangVien == null) {
+//            throw new IllegalArgumentException("Danh sách kết quả hoặc giảng viên không được để null.");
+//        }
+//        xlDAL.caiTienKetQua(ketQuaXepLich, lstGiangVien);
+//    }
+    public List<LichThiXepResult> caiTienKetQua(List<LichThiXepResult> ketQuaXepLich, List<GiangVienDTO> lstGiangVien) {
+        return xlDAL.caiTienKetQua(ketQuaXepLich, lstGiangVien);
     }
 }

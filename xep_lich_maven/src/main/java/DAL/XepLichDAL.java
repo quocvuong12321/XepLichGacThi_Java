@@ -119,15 +119,21 @@ public class XepLichDAL {
         return resultMatrix;
     }
 
-    public static int danhGiaLichThi(List<LichThiXepResult> danhSachKetQua) {
-        return danhSachKetQua.stream()
-                .mapToInt(lichThiResult -> lichThiResult.getGiangViens().stream()
-                .mapToInt(gv -> gv.getLichGacThi().stream()
-                .mapToInt(lichGacThi -> GiangVienDTO.tinhKhoangCach(lichThiResult.getLichThi(), lichGacThi))
-                .sum())
-                .sum())
-                .sum();
+    public static int danhGiaLichThi(List<GiangVienDTO> danhSachGiangVien) {
+    int tongDiem = 0;
+    for (GiangVienDTO gv : danhSachGiangVien) {
+        List<LichThiDTO> lichGac = gv.getLichGacThi();
+        for (int i = 0; i < lichGac.size(); i++) {
+            for (int j = i + 1; j < lichGac.size(); j++) {
+                tongDiem += GiangVienDTO.tinhKhoangCach(lichGac.get(i), lichGac.get(j));
+            }
+        }
     }
+    return tongDiem;
+}
+    
+    
+
 
     public List<LichThiDTO> layDanhSachLichChuaXep() {
         return Cathichuaxep != null && !Cathichuaxep.isEmpty() ? Cathichuaxep : new ArrayList<>();
@@ -197,33 +203,81 @@ public class XepLichDAL {
         }
     }
 
-    public void caiTienKetQua(List<LichThiXepResult> ketquaxeplich, List<GiangVienDTO> LstGiangVien) {
-        final int soTheHe = 75;
-        if (ketquaxeplich == null || LstGiangVien == null || soTheHe <= 0) {
-            throw new IllegalArgumentException("Tham số không hợp lệ: Danh sách hoặc số thế hệ không đúng.");
-        }
+//    public void caiTienKetQua(List<LichThiXepResult> ketquaxeplich, List<GiangVienDTO> LstGiangVien) {
+//        final int soTheHe = 75;
+//        if (ketquaxeplich == null || LstGiangVien == null || soTheHe <= 0) {
+//            throw new IllegalArgumentException("Tham số không hợp lệ: Danh sách hoặc số thế hệ không đúng.");
+//        }
+//
+//        int bestScore = danhGiaLichThi(ketquaxeplich);
+//
+//        for (int i = 0; i < soTheHe; i++) {
+//            // Tạo bản sao của danh sách hiện tại
+//            List<LichThiXepResult> cloneKetQua = ketquaxeplich.stream()
+//                    .map(kq -> new LichThiXepResult(kq.getLichThi(), new ArrayList<>(kq.getGiangViens())))
+//                    .collect(Collectors.toList());
+//
+//            // Thực hiện đột biến
+//            dotBien(cloneKetQua, LstGiangVien, 30); // Số lượng đột biến được truyền ở đây là 30
+//
+//            // Tính điểm fitness sau khi đột biến
+//            int newScore = danhGiaLichThi(cloneKetQua);
+//
+//            // Nếu kết quả mới tốt hơn, chấp nhận thay đổi
+//            if (newScore < bestScore) {
+//                ketquaxeplich.clear();
+//                ketquaxeplich.addAll(cloneKetQua);
+//                bestScore = newScore;
+//            }
+//        }
+//    }
 
-        int bestScore = danhGiaLichThi(ketquaxeplich);
-
-        for (int i = 0; i < soTheHe; i++) {
-            // Tạo bản sao của danh sách hiện tại
-            List<LichThiXepResult> cloneKetQua = ketquaxeplich.stream()
-                    .map(kq -> new LichThiXepResult(kq.getLichThi(), new ArrayList<>(kq.getGiangViens())))
-                    .collect(Collectors.toList());
-
-            // Thực hiện đột biến
-            dotBien(cloneKetQua, LstGiangVien, 30); // Số lượng đột biến được truyền ở đây là 30
-
-            // Tính điểm fitness sau khi đột biến
-            int newScore = danhGiaLichThi(cloneKetQua);
-
-            // Nếu kết quả mới tốt hơn, chấp nhận thay đổi
-            if (newScore < bestScore) {
-                ketquaxeplich.clear();
-                ketquaxeplich.addAll(cloneKetQua);
-                bestScore = newScore;
-            }
+private void capNhatLichGacChoGiangVien(List<LichThiXepResult> ketQua, List<GiangVienDTO> lstGiangVien) {
+    // Xóa hết lịch gác cũ của tất cả giảng viên
+    for (GiangVienDTO gv : lstGiangVien) {
+        gv.getLichGacThi().clear();
+    }
+    // Thêm lịch gác theo kết quả xếp lịch mới
+    for (LichThiXepResult kq : ketQua) {
+        LichThiDTO lichThi = kq.getLichThi();
+        for (GiangVienDTO gv : kq.getGiangViens()) {
+            gv.getLichGacThi().add(lichThi);
         }
     }
+}
+
+
+public List<LichThiXepResult> caiTienKetQua(List<LichThiXepResult> ketquaxeplich, List<GiangVienDTO> lstGiangVien) {
+    final int soTheHe = 100000;
+    if (ketquaxeplich == null || lstGiangVien == null || soTheHe <= 0) {
+        throw new IllegalArgumentException("Tham số không hợp lệ: Danh sách hoặc số thế hệ không đúng.");
+    }
+
+    List<LichThiXepResult> bestKetQua = ketquaxeplich.stream()
+            .map(kq -> new LichThiXepResult(kq.getLichThi(), new ArrayList<>(kq.getGiangViens())))
+            .collect(Collectors.toList());
+
+    capNhatLichGacChoGiangVien(bestKetQua, lstGiangVien);
+    int bestScore = danhGiaLichThi(lstGiangVien);
+
+    for (int i = 0; i < soTheHe; i++) {
+        List<LichThiXepResult> cloneKetQua = bestKetQua.stream()
+                .map(kq -> new LichThiXepResult(kq.getLichThi(), new ArrayList<>(kq.getGiangViens())))
+                .collect(Collectors.toList());
+
+        int soDotBien = Math.max(10, 30 - i / 3);
+        dotBien(cloneKetQua, lstGiangVien, soDotBien);
+
+        capNhatLichGacChoGiangVien(cloneKetQua, lstGiangVien);
+        int newScore = danhGiaLichThi(lstGiangVien);
+
+        if (newScore < bestScore) {
+            bestKetQua = cloneKetQua;
+            bestScore = newScore;
+        }
+    }
+    return bestKetQua;
+}
+
 
 }

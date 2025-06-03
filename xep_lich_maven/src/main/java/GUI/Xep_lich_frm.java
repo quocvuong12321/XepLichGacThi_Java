@@ -379,7 +379,7 @@ public class Xep_lich_frm extends javax.swing.JFrame {
 }   
         
         lstKqXep = xlBLL.xepLichGacThi(dsLichThi, lstGiangVien);
-        txtDiemXepLich.setText(xlBLL.danhGiaLichThi(lstKqXep) + " Điểm");
+        txtDiemXepLich.setText(xlBLL.danhGiaLichThi(lstGiangVien) + " Điểm");
         
         
         
@@ -403,12 +403,14 @@ public class Xep_lich_frm extends javax.swing.JFrame {
     }//GEN-LAST:event_btnXepLichActionPerformed
 
     private void btnToiUuHoaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnToiUuHoaActionPerformed
-        xlBLL.caiTienKetQua(lstKqXep, lstGiangVien);
-
+        lstKqXep = xlBLL.caiTienKetQua(lstKqXep, lstGiangVien);
+//        xlBLL.caiTienKetQua(lstKqXep, lstGiangVien);
+            
         // Hiển thị điểm sau khi tối ưu
-        txtDiemSauToiUu.setText(xlBLL.danhGiaLichThi(lstKqXep) + " Điểm");
-
+//        txtDiemSauToiUu.setText(xlBLL.danhGiaLichThi(lstKqXep) + " Điểm");
+        txtDiemSauToiUu.setText(xlBLL.danhGiaLichThi(lstGiangVien) + " Điểm");
         // Cập nhật lại bảng sau khi tối ưu
+//        ketquaxep = xlBLL.chuyenDoiXepLichSangMang(lstKqXep, lstGiangVien);
         ketquaxep = xlBLL.chuyenDoiXepLichSangMang(lstKqXep, lstGiangVien);
         SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy"); // Định dạng ngày ngắn gọn
         uniqueColumns = lstKqXep.stream()
@@ -419,6 +421,7 @@ public class Xep_lich_frm extends javax.swing.JFrame {
                 .distinct()
                 .collect(Collectors.toList());
 
+//        updateDataGridView(tableXepLich, ketquaxep, lstGiangVien, uniqueColumns);
         updateDataGridView(tableXepLich, ketquaxep, lstGiangVien, uniqueColumns);
     }//GEN-LAST:event_btnToiUuHoaActionPerformed
 
